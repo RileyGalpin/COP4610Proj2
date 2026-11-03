@@ -8,30 +8,39 @@
 - **[Member]**: [School Email]
 ## Division of Labor
 
-### Part 1: [Description]
-- **Responsibilities**: [Description]
-- **Assigned to**: [Members]
+Team Members:
+1.Riley Galpin
+2. Taylor Vaughn
+3. John Simson 
 
-### Part 2: [Description]
-- **Responsibilities**: [Description]
-- **Assigned to**: [Members]
+Part 1: System Call Tracing
+- Riley Galpin
 
-### Extra Credit
-- **Responsibilities**: [Description]
-- **Assigned to**: [Members]
+Part 2: Timer Kernel Module
+- Taylor Vaughn
+
+Part 3a: Adding System Calls
+- Riley Galpin, John Simson
+
+Part 3b: Kernel Compilation
+- Riley Galpin
+
+Part 3c: Threads
+- John Simson
+
+Part 3d: Linked List
+- Taylor Vaughn, John Simson
+
+Part 3e: Mutexes
+-Taylor Vaughn, John Simson
+
+Part 3f: Scheduling Algorithm
+- John Simson 
+
+
 
 ## File Listing
-```
-root/
-â”œâ”€â”€ src/
-â”‚   â”œâ”€â”€ main.c
-â”‚   â””â”€â”€ ...
-â”œâ”€â”€ include/
-â”‚   â””â”€â”€ ...
-â”œâ”€â”€ README.md
-â””â”€â”€ Makefile
 
-```
 ## How to Compile & Execute
 
 ### Requirements
