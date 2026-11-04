@@ -1,6 +1,9 @@
 # Prerequisites
 *.d
 
+# Project Instructions
+/ProjectInstructions/
+
 # Object files
 *.o
 *.ko
