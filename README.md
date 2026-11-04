@@ -44,8 +44,7 @@ Part 3f: Scheduling Algorithm
 ## How to Compile & Execute
 
 ### Requirements
-- **Compiler**: e.g., `gcc` for C/C++, `rustc` for Rust.
-- **Dependencies**: List any libraries or frameworks necessary (rust only).
+- **Compiler**: e.g., `gcc` for C/C++
 
 ### Compilation
 For a C/C++ example:
@@ -62,7 +61,7 @@ This will run the program ...
 ## Development Log
 Each member records their contributions here.
 
-### [Member 1]
+### Riley Galpin
 
 | Date       | Work Completed / Notes |
 |------------|------------------------|
@@ -70,7 +69,7 @@ Each member records their contributions here.
 | YYYY-MM-DD | [Description of task]  |
 | YYYY-MM-DD | [Description of task]  |
 
-### [Member 2]
+### Taylor Vaughn
 
 | Date       | Work Completed / Notes |
 |------------|------------------------|
@@ -79,13 +78,13 @@ Each member records their contributions here.
 | YYYY-MM-DD | [Description of task]  |
 
 
-### [Member 3]
+### John Simson
 
 | Date       | Work Completed / Notes |
 |------------|------------------------|
-| YYYY-MM-DD | [Description of task]  |
-| YYYY-MM-DD | [Description of task]  |
-| YYYY-MM-DD | [Description of task]  |
+| 2026-11-03 | [Description of task]  |
+| 2026-11-04 | [Description of task]  |
+| 2026-11-05 | [Description of task]  |
 
 
 ## Meetings
