@@ -13,32 +13,50 @@ Team Members:
 2. Taylor Vaughn
 3. John Simson 
 
-Part 1: System Call Tracing
+Part 1: System Call Tracing [Done: , Tested:]
 - Riley Galpin
 
-Part 2: Timer Kernel Module
+Part 2: Timer Kernel Module [Done: , Tested:]
 - Taylor Vaughn
 
-Part 3a: Adding System Calls
+Part 3a: Adding System Calls [Done: , Tested:]
 - Riley Galpin, John Simson
 
-Part 3b: Kernel Compilation
+Part 3b: Kernel Compilation [Done: , Tested:]
 - Riley Galpin
 
-Part 3c: Threads
+Part 3c: Threads [Done: , Tested:]
 - John Simson
 
-Part 3d: Linked List
+Part 3d: Linked List [Done: , Tested:]
 - Taylor Vaughn, John Simson
 
-Part 3e: Mutexes
+Part 3e: Mutexes [Done: , Tested:]
 -Taylor Vaughn, John Simson
 
-Part 3f: Scheduling Algorithm
+Part 3f: Scheduling Algorithm [Done: , Tested:]
 - John Simson 
 
+## General Dev Dependency Graph
 
-
+PHASE 1
+┌─────────┬─────────┬─────────┐
+│ Part 1  │ Part 2  │ Part 3a │
+└─────────┴─────────┴────┬────┘
+                         ↓
+PHASE 2                Part 3b
+                         ↓
+PHASE 3       ┌──────────┼──────────┐
+              ↓          ↓          ↓
+             3c         3d         3e
+           Threads     Lists      Mutexes
+              └──────────┼──────────┘
+                         ↓
+PHASE 4                 3f
+                    Scheduling
+                         ↓
+                  Integration/Test
+                  
 ## File Listing
 
 ## How to Compile & Execute
