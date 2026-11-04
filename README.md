@@ -13,16 +13,16 @@ Team Members:
 2. Taylor Vaughn
 3. John Simson 
 
-Part 1: System Call Tracing [Done: , Tested:]
+Part 1: System Call Tracing [Done: Y , Tested: Y]
 - Riley Galpin
 
 Part 2: Timer Kernel Module [Done: , Tested:]
 - Taylor Vaughn
 
-Part 3a: Adding System Calls [Done: , Tested:]
+Part 3a: Adding System Calls [Done: Y, Tested: Y]
 - Riley Galpin, John Simson
 
-Part 3b: Kernel Compilation [Done: , Tested:]
+Part 3b: Kernel Compilation [Done: Y , Tested: Y]
 - Riley Galpin
 
 Part 3c: Threads [Done: , Tested:]
