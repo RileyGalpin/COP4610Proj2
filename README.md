@@ -3,13 +3,36 @@
 [Description]
 
 ## Group Members
-- **[Member]**: [School Email]
-- **[Member]**: [School Email]
-- **[Member]**: [School Email]
+- **[John Simson]**: [School Email]
+- **[Riley Galpin]**: [School Email]
+- **[Taylor Vaughn]**: [School Email]
+
+## Kernel Versions & Ubuntu Versions:
+Everyone Run: 
+```bash
+lsb_release -a
+uname -r
+uname -m
+```
+
+- **John Simson**: 
+```bash
+No LSB modules are available.
+Distributor ID:	Ubuntu
+Description:	Ubuntu 26.04.1 LTS
+Release:	26.04
+Codename:	resolute
+7.0.0-42-generic
+x86_64
+```
+
+- **Riley Galpin**: 
+- **Taylor Vaughn**:
+
 ## Division of Labor
 
 Team Members:
-1.Riley Galpin
+1. Riley Galpin
 2. Taylor Vaughn
 3. John Simson 
 
@@ -56,7 +79,7 @@ PHASE 4                 3f
                     Scheduling
                          ↓
                   Integration/Test
-                  
+
 ## File Listing
 
 ## How to Compile & Execute
