@@ -62,26 +62,48 @@ Part 3f: Scheduling Algorithm [Done: , Tested:]
 
 ## General Dev Dependency Graph
 
-PHASE 1
-┌─────────┬─────────┬─────────┐
-│ Part 1  │ Part 2  │ Part 3a │
-└─────────┴─────────┴────┬────┘
-                         ↓
-PHASE 2                Part 3b
-                         ↓
-PHASE 3       ┌──────────┼──────────┐
-              ↓          ↓          ↓
-             3c         3d         3e
-           Threads     Lists      Mutexes
-              └──────────┼──────────┘
-                         ↓
-PHASE 4                 3f
-                    Scheduling
-                         ↓
-                  Integration/Test
+```mermaid
+flowchart TD
+    A[Part 1: System Call Tracing]
+    B[Part 2: Timer Kernel Module]
+    C[Part 3a: Adding System Calls]
+
+    D[Part 3b: Kernel Compilation]
+    E[Part 3c: Threads]
+    F[Part 3d: Linked Lists]
+    G[Part 3e: Mutexes]
+    H[Part 3f: Scheduling Algorithm]
+    I[Integration and Testing]
+
+    C --> D
+    D --> E
+    D --> F
+    D --> G
+    E --> H
+    F --> H
+    G --> H
+    H --> I
+```
 
 ## File Listing
-
+```
+.
+├── part1/
+│   ├── empty.c
+│   └── part1.c
+├── part2/
+│   ├── Makefile
+│   └── src/
+│       └── my_timer.c
+├── part3/
+│   ├── Makefile
+│   ├── syscalls.c
+│   └── src/
+│       ├── elevator.c
+│       ├── elevator.h
+│       └── Makefile
+└── README.md
+```
 ## How to Compile & Execute
 
 ### Requirements
