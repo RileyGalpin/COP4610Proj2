@@ -30,6 +30,11 @@ enum elevator_state {
     ELEVATOR_DOWN
 };
 
+enum elevator_direction {
+    DIRECTION_UP,
+    DIRECTION_DOWN
+};
+
 static const int pet_weights[] = {
     3, 14, 10, 16
 };
@@ -60,13 +65,21 @@ static int current_floor = 1;
 static struct task_struct *elevator_thread;
 static bool stop_requested;
 static int pets_waiting;
+static enum elevator_direction current_direction = DIRECTION_UP;
+static struct proc_dir_entry *elevator_proc_entry;
+
+/* These symbols are exported by the custom kernel's syscall implementation. */
+extern int (*STUB_start_elevator)(void) __attribute__((weak));
+extern int (*STUB_issue_request)(int, int, int) __attribute__((weak));
+extern int (*STUB_stop_elevator)(void) __attribute__((weak));
 
 //Protects elevator and floor data
 static DEFINE_MUTEX(elevator_mutex);
 
 static int pets_serviced = 0;
 
-static bool requests_above_locked(void) # AI-assisted function
+/* Check for work above the current floor while elevator_mutex is held. */
+static bool requests_above_locked(void)
 {
     int floor;
     struct pet *pet;
@@ -84,7 +97,8 @@ static bool requests_above_locked(void) # AI-assisted function
     return false;
 }
 
-static bool requests_below_locked(void) # AI-assisted function
+/* Check for work below the current floor while elevator_mutex is held. */
+static bool requests_below_locked(void)
 {
     int floor;
     struct pet *pet;
@@ -102,7 +116,8 @@ static bool requests_below_locked(void) # AI-assisted function
     return false;
 }
 
-static bool passengers_above_locked(void) # AI-assisted function
+/* During shutdown, only onboard pets are allowed to determine movement. */
+static bool passengers_above_locked(void)
 {
     struct pet *pet;
 
@@ -126,7 +141,8 @@ static bool passengers_below_locked(void)
     return false;
 }
 
-static bool service_current_floor(void) # AI-assisted function
+/* Complete one loading/unloading stop and report whether anything changed. */
+static bool service_current_floor(void)
 {
     int pets_before;
     int pets_after;
@@ -149,9 +165,12 @@ static bool service_current_floor(void) # AI-assisted function
     return boarded || pets_before != pets_after;
 }
 
-static int elevator_thread_fn(void *data)  # AI-assisted function
+/* The worker owns movement decisions; list and counter changes stay mutex-protected. */
+static int elevator_thread_fn(void *data)
 {
     bool floor_changed;
+    bool work_above;
+    bool work_below;
 
     while (!kthread_should_stop()) {
         floor_changed = service_current_floor();
@@ -163,6 +182,7 @@ static int elevator_thread_fn(void *data)  # AI-assisted function
 
         if (stop_requested && current_pet_count == 0) {
             current_state = ELEVATOR_OFFLINE;
+            elevator_thread = NULL;
             mutex_unlock(&elevator_mutex);
             break;
         }
@@ -174,18 +194,32 @@ static int elevator_thread_fn(void *data)  # AI-assisted function
             continue;
         }
 
-        if (current_floor < NUM_FLOORS &&
-            (stop_requested ? passengers_above_locked() :
-                              requests_above_locked())) {
+        work_above = stop_requested ? passengers_above_locked() :
+                                      requests_above_locked();
+        work_below = stop_requested ? passengers_below_locked() :
+                                      requests_below_locked();
+
+        if (current_direction == DIRECTION_UP &&
+            current_floor < NUM_FLOORS && work_above) {
             current_state = ELEVATOR_UP;
+            current_direction = DIRECTION_UP;
             current_floor++;
-        } else if (current_floor > 1 &&
-                   (stop_requested ? passengers_below_locked() :
-                                     requests_below_locked())) {
+        } else if (current_direction == DIRECTION_DOWN &&
+                   current_floor > 1 && work_below) {
             current_state = ELEVATOR_DOWN;
+            current_direction = DIRECTION_DOWN;
             current_floor--;
+        } else if (current_floor > 1 && work_below) {
+            current_state = ELEVATOR_DOWN;
+            current_direction = DIRECTION_DOWN;
+            current_floor--;
+        } else if (current_floor < NUM_FLOORS && work_above) {
+            current_state = ELEVATOR_UP;
+            current_direction = DIRECTION_UP;
+            current_floor++;
         } else if (stop_requested && current_pet_count == 0) {
             current_state = ELEVATOR_OFFLINE;
+            elevator_thread = NULL;
             mutex_unlock(&elevator_mutex);
             break;
         } else {
@@ -216,6 +250,7 @@ void initialize_lists(void)
     current_floor = 1;
     elevator_thread = NULL;
     stop_requested = false;
+    current_direction = DIRECTION_UP;
     current_load = 0;
     current_pet_count = 0;
     pets_waiting = 0;
@@ -251,6 +286,12 @@ int add_pet(int start_floor, int destination_floor, int type)
     INIT_LIST_HEAD(&new_pet->list);
 
     mutex_lock(&elevator_mutex);
+
+    if (current_state == ELEVATOR_OFFLINE || stop_requested) {
+        mutex_unlock(&elevator_mutex);
+        kfree(new_pet);
+        return -EINVAL;
+    }
 
     list_add_tail(&new_pet->list, &floor_queues[start_floor - 1]);
     pets_waiting++;
@@ -371,10 +412,183 @@ void cleanup_lists(void)
     current_floor = 1;
     elevator_thread = NULL;
     stop_requested = false;
+    current_direction = DIRECTION_UP;
     pets_waiting = 0;
     pets_serviced = 0;
 
     mutex_unlock(&elevator_mutex);
+}
+
+/* Start creates the worker while holding the state lock, then wakes it after
+ * its task pointer has been published. This prevents a second start from
+ * creating a competing worker during initialization. */
+static int elevator_start(void)
+{
+    struct task_struct *thread;
+
+    mutex_lock(&elevator_mutex);
+
+    if (elevator_thread || current_state != ELEVATOR_OFFLINE) {
+        mutex_unlock(&elevator_mutex);
+        return 1;
+    }
+
+    current_floor = 1;
+    current_direction = DIRECTION_UP;
+    current_state = ELEVATOR_IDLE;
+    stop_requested = false;
+
+    thread = kthread_create(elevator_thread_fn, NULL, "elevator");
+    if (IS_ERR(thread)) {
+        current_state = ELEVATOR_OFFLINE;
+        mutex_unlock(&elevator_mutex);
+        return PTR_ERR(thread);
+    }
+
+    elevator_thread = thread;
+    mutex_unlock(&elevator_mutex);
+    wake_up_process(thread);
+
+    return 0;
+}
+
+/* Requests are rejected once shutdown begins; the worker drains onboard pets
+ * and leaves waiting pets in their floor queues for a future start. */
+static int elevator_issue_request(int start_floor, int destination_floor,
+                                  int type)
+{
+    int result;
+
+    result = add_pet(start_floor, destination_floor, type);
+    return result < 0 ? 1 : 0;
+}
+
+/* Stop is asynchronous: the syscall marks shutdown, and the worker changes
+ * to OFFLINE only after every onboard pet has reached its destination. */
+static int elevator_stop(void)
+{
+    mutex_lock(&elevator_mutex);
+
+    if (stop_requested) {
+        mutex_unlock(&elevator_mutex);
+        return 1;
+    }
+
+    stop_requested = true;
+    if (!elevator_thread && current_pet_count == 0)
+        current_state = ELEVATOR_OFFLINE;
+
+    mutex_unlock(&elevator_mutex);
+    return 0;
+}
+
+static const char *elevator_state_name(enum elevator_state state)
+{
+    switch (state) {
+    case ELEVATOR_IDLE:
+        return "IDLE";
+    case ELEVATOR_LOADING:
+        return "LOADING";
+    case ELEVATOR_UP:
+        return "UP";
+    case ELEVATOR_DOWN:
+        return "DOWN";
+    case ELEVATOR_OFFLINE:
+    default:
+        return "OFFLINE";
+    }
+}
+
+static char pet_type_name(enum pet_type type)
+{
+    switch (type) {
+    case CHIHUAHUA:
+        return 'C';
+    case PUG:
+        return 'P';
+    case PUGHUAHUA:
+        return 'H';
+    case DACHSHUND:
+        return 'D';
+    default:
+        return '?';
+    }
+}
+
+/* Produce the assignment's labeled elevator snapshot while holding the same
+ * mutex used by producers and the worker, so no list is read mid-update. */
+static int elevator_proc_show(struct seq_file *file, void *unused)
+{
+    struct pet *pet;
+    int floor;
+    int waiting_count;
+
+    mutex_lock(&elevator_mutex);
+
+    seq_printf(file, "Elevator state: %s\n",
+               elevator_state_name(current_state));
+    seq_printf(file, "Current floor: %d\n", current_floor);
+    seq_printf(file, "Current load: %d lbs\n", current_load);
+    seq_puts(file, "Elevator status:");
+    list_for_each_entry(pet, &elevator_passengers, list)
+        seq_printf(file, " %c%d", pet_type_name(pet->type),
+                   pet->destination_floor);
+    seq_putc(file, '\n');
+
+    for (floor = NUM_FLOORS - 1; floor >= 0; floor--) {
+        waiting_count = 0;
+        seq_printf(file, "Floor %d: %s ", floor + 1,
+                   current_floor == floor + 1 ? "[*]" : "[ ]");
+
+        list_for_each_entry(pet, &floor_queues[floor], list) {
+            waiting_count++;
+            seq_printf(file, "%c%d ", pet_type_name(pet->type),
+                       pet->destination_floor);
+        }
+
+        seq_printf(file, "(%d waiting)\n", waiting_count);
+    }
+
+    seq_printf(file, "Number of pets: %d\n", current_pet_count);
+    seq_printf(file, "Number of pets waiting: %d\n", pets_waiting);
+    seq_printf(file, "Number of pets serviced: %d\n", pets_serviced);
+
+    mutex_unlock(&elevator_mutex);
+    return 0;
+}
+
+static int elevator_proc_open(struct inode *inode, struct file *file)
+{
+    return single_open(file, elevator_proc_show, NULL);
+}
+
+static const struct proc_ops elevator_proc_ops = {
+    .proc_open = elevator_proc_open,
+    .proc_read = seq_read,
+    .proc_lseek = seq_lseek,
+    .proc_release = single_release,
+};
+
+/* The custom kernel exports these callback slots from syscalls.c. Weak
+ * declarations keep the module buildable on a non-custom development kernel. */
+static void register_syscall_callbacks(void)
+{
+    if (&STUB_start_elevator)
+        STUB_start_elevator = elevator_start;
+    if (&STUB_issue_request)
+        STUB_issue_request = elevator_issue_request;
+    if (&STUB_stop_elevator)
+        STUB_stop_elevator = elevator_stop;
+}
+
+static void unregister_syscall_callbacks(void)
+{
+    if (&STUB_start_elevator)
+        STUB_start_elevator = NULL;
+    if (&STUB_issue_request)
+        STUB_issue_request = NULL;
+    if (&STUB_stop_elevator)
+        STUB_stop_elevator = NULL;
 }
 
 MODULE_LICENSE("GPL");
@@ -384,6 +598,13 @@ static int __init elevator_init(void)
 {
     initialize_lists();
 
+    elevator_proc_entry = proc_create("elevator", 0444, NULL,
+                                      &elevator_proc_ops);
+    if (!elevator_proc_entry)
+        return -ENOMEM;
+
+    register_syscall_callbacks();
+
     printk(KERN_INFO "Elevator module loaded\n");
 
     return 0;
@@ -391,8 +612,22 @@ static int __init elevator_init(void)
 
 static void __exit elevator_exit(void)
 {
-    if (elevator_thread)
-        kthread_stop(elevator_thread);
+    struct task_struct *thread;
+
+    unregister_syscall_callbacks();
+
+    if (elevator_proc_entry) {
+        proc_remove(elevator_proc_entry);
+        elevator_proc_entry = NULL;
+    }
+
+    mutex_lock(&elevator_mutex);
+    stop_requested = true;
+    thread = elevator_thread;
+    mutex_unlock(&elevator_mutex);
+
+    if (thread)
+        kthread_stop(thread);
 
     cleanup_lists();
 
