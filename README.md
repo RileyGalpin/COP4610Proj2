@@ -113,17 +113,83 @@ flowchart TD
 ### Requirements
 - **Compiler**: e.g., `gcc` for C/C++
 
-### Compilation
-For a C/C++ example:
+## Building and Running
+
+### Prerequisites
+
 ```bash
+sudo apt update
+sudo apt install build-essential strace linux-headers-$(uname -r)
+```
+
+### Part 1: System-Call Tracing
+
+```bash
+cd part1
+
+gcc -o empty empty.c
+strace -o empty.trace ./empty
+
+gcc -o part1 part1.c
+strace -o part1.trace ./part1
+```
+
+`part1.trace` should have exactly 5 more lines than `empty.trace`:
+
+```bash
+wc -l empty.trace part1.trace
+```
+### Part 2: Timer Kernel Module (`my_timer`)
+
+**Build** (run from `part2/src`, where `my_timer.c` and the `Makefile` live):
+
+```bash
+cd part2/src
 make
 ```
-This will build the executable in ...
-### Execution
+
+This produces `my_timer.ko`.
+
+**Load the module:**
+
 ```bash
-make run
+sudo insmod my_timer.ko
+lsmod | grep my_timer
 ```
-This will run the program ...
+
+**Test:**
+
+```bash
+cat /proc/timer
+sleep 1
+cat /proc/timer
+sleep 3
+cat /proc/timer
+```
+
+Expected output (your timestamps will differ):
+
+```
+current time: 1518647111.760933999
+current time: 1518647112.768429998
+elapsed time: 1.007495999
+current time: 1518647115.774925999
+elapsed time: 3.006496001
+```
+
+**Unload and clean up:**
+
+```bash
+sudo rmmod my_timer
+ls /proc/timer        # should say "No such file or directory"
+make clean
+```
+
+**Debugging:** `printk` output shows up in:
+
+```bash
+sudo dmesg | tail
+```
 
 ## Development Log
 Each member records their contributions here.
