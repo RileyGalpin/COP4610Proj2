@@ -66,6 +66,142 @@ static DEFINE_MUTEX(elevator_mutex);
 
 static int pets_serviced = 0;
 
+static bool requests_above_locked(void) # AI-assisted function
+{
+    int floor;
+    struct pet *pet;
+
+    for (floor = current_floor; floor < NUM_FLOORS; floor++) {
+        if (!list_empty(&floor_queues[floor]))
+            return true;
+    }
+
+    list_for_each_entry(pet, &elevator_passengers, list) {
+        if (pet->destination_floor > current_floor)
+            return true;
+    }
+
+    return false;
+}
+
+static bool requests_below_locked(void) # AI-assisted function
+{
+    int floor;
+    struct pet *pet;
+
+    for (floor = 0; floor < current_floor - 1; floor++) {
+        if (!list_empty(&floor_queues[floor]))
+            return true;
+    }
+
+    list_for_each_entry(pet, &elevator_passengers, list) {
+        if (pet->destination_floor < current_floor)
+            return true;
+    }
+
+    return false;
+}
+
+static bool passengers_above_locked(void) # AI-assisted function
+{
+    struct pet *pet;
+
+    list_for_each_entry(pet, &elevator_passengers, list) {
+        if (pet->destination_floor > current_floor)
+            return true;
+    }
+
+    return false;
+}
+
+static bool passengers_below_locked(void)
+{
+    struct pet *pet;
+
+    list_for_each_entry(pet, &elevator_passengers, list) {
+        if (pet->destination_floor < current_floor)
+            return true;
+    }
+
+    return false;
+}
+
+static bool service_current_floor(void) # AI-assisted function
+{
+    int pets_before;
+    int pets_after;
+    bool boarded = false;
+
+    mutex_lock(&elevator_mutex);
+    current_state = ELEVATOR_LOADING;
+    pets_before = current_pet_count;
+    mutex_unlock(&elevator_mutex);
+
+    unload_pets(current_floor);
+
+    while (board_pet(current_floor))
+        boarded = true;
+
+    mutex_lock(&elevator_mutex);
+    pets_after = current_pet_count;
+    mutex_unlock(&elevator_mutex);
+
+    return boarded || pets_before != pets_after;
+}
+
+static int elevator_thread_fn(void *data)  # AI-assisted function
+{
+    bool floor_changed;
+
+    while (!kthread_should_stop()) {
+        floor_changed = service_current_floor();
+
+        if (floor_changed)
+            msleep(1000);
+
+        mutex_lock(&elevator_mutex);
+
+        if (stop_requested && current_pet_count == 0) {
+            current_state = ELEVATOR_OFFLINE;
+            mutex_unlock(&elevator_mutex);
+            break;
+        }
+
+        if (current_pet_count == 0 && pets_waiting == 0) {
+            current_state = ELEVATOR_IDLE;
+            mutex_unlock(&elevator_mutex);
+            msleep(100);
+            continue;
+        }
+
+        if (current_floor < NUM_FLOORS &&
+            (stop_requested ? passengers_above_locked() :
+                              requests_above_locked())) {
+            current_state = ELEVATOR_UP;
+            current_floor++;
+        } else if (current_floor > 1 &&
+                   (stop_requested ? passengers_below_locked() :
+                                     requests_below_locked())) {
+            current_state = ELEVATOR_DOWN;
+            current_floor--;
+        } else if (stop_requested && current_pet_count == 0) {
+            current_state = ELEVATOR_OFFLINE;
+            mutex_unlock(&elevator_mutex);
+            break;
+        } else {
+            current_state = ELEVATOR_IDLE;
+            mutex_unlock(&elevator_mutex);
+            msleep(100);
+            continue;
+        }
+
+        mutex_unlock(&elevator_mutex);
+        msleep(2000);
+    }
+
+    return 0;
+}
+
 void initialize_lists(void)
 {
     int i;
@@ -133,6 +269,11 @@ int board_pet(int floor)
         return -EINVAL;
 
     mutex_lock(&elevator_mutex);
+
+    if (stop_requested) {
+        mutex_unlock(&elevator_mutex);
+        return 0;
+    }
 
     //Check if a pet is waiting
     if (list_empty(&floor_queues[floor - 1])) {
@@ -250,6 +391,9 @@ static int __init elevator_init(void)
 
 static void __exit elevator_exit(void)
 {
+    if (elevator_thread)
+        kthread_stop(elevator_thread);
+
     cleanup_lists();
 
     printk(KERN_INFO "Elevator module unloaded\n");
