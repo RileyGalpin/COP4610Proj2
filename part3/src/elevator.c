@@ -22,6 +22,14 @@ enum pet_type {
     DACHSHUND
 };
 
+enum elevator_state {
+    ELEVATOR_OFFLINE,
+    ELEVATOR_IDLE,
+    ELEVATOR_LOADING,
+    ELEVATOR_UP,
+    ELEVATOR_DOWN
+};
+
 static const int pet_weights[] = {
     3, 14, 10, 16
 };
@@ -47,6 +55,12 @@ static int current_load = 0;
 //Current pet count 
 static int current_pet_count = 0;
 
+static enum elevator_state current_state = ELEVATOR_OFFLINE;
+static int current_floor = 1;
+static struct task_struct *elevator_thread;
+static bool stop_requested;
+static int pets_waiting;
+
 //Protects elevator and floor data
 static DEFINE_MUTEX(elevator_mutex);
 
@@ -61,6 +75,15 @@ void initialize_lists(void)
     }
 
     INIT_LIST_HEAD(&elevator_passengers);
+
+    current_state = ELEVATOR_OFFLINE;
+    current_floor = 1;
+    elevator_thread = NULL;
+    stop_requested = false;
+    current_load = 0;
+    current_pet_count = 0;
+    pets_waiting = 0;
+    pets_serviced = 0;
 }
 
 
@@ -94,6 +117,7 @@ int add_pet(int start_floor, int destination_floor, int type)
     mutex_lock(&elevator_mutex);
 
     list_add_tail(&new_pet->list, &floor_queues[start_floor - 1]);
+    pets_waiting++;
 
     mutex_unlock(&elevator_mutex);
 
@@ -137,6 +161,7 @@ int board_pet(int floor)
     //Updates elevator information 
     current_pet_count++;
     current_load += next_pet->weight;
+    pets_waiting--;
 
     mutex_unlock(&elevator_mutex);
 
@@ -201,6 +226,12 @@ void cleanup_lists(void)
     //Reset all elevator information 
     current_load = 0;
     current_pet_count = 0;
+    current_state = ELEVATOR_OFFLINE;
+    current_floor = 1;
+    elevator_thread = NULL;
+    stop_requested = false;
+    pets_waiting = 0;
+    pets_serviced = 0;
 
     mutex_unlock(&elevator_mutex);
 }
