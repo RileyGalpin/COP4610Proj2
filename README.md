@@ -27,6 +27,10 @@ x86_64
 ```
 
 - **Riley Galpin**: 
+```bash
+6.16.0-elevator
+aarch64
+```
 - **Taylor Vaughn**:
 
 ## Division of Labor
