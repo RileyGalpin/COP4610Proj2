@@ -4,7 +4,7 @@
 
 ## Group Members
 - **[John Simson]**: [School Email]
-- **[Riley Galpin]**: [School Email]
+- **[Riley Galpin]**: rg22bf@fsu.edu
 - **[Taylor Vaughn]**: tmv22a@fsu.edu
 
 ## Kernel Versions & Ubuntu Versions:
@@ -207,9 +207,9 @@ Each member records their contributions here.
 
 | Date       | Work Completed / Notes |
 |------------|------------------------|
-| YYYY-MM-DD | [Description of task]  |
-| YYYY-MM-DD | [Description of task]  |
-| YYYY-MM-DD | [Description of task]  |
+| 2026-10-18 | Completed part 1 System call Tracing  |
+| 2026-10-19 | Completed part 3a Add System Calls|
+| 2026-10-20 | Completed part 3b Compile Kernel |
 
 ### Taylor Vaughn
 
