@@ -33,7 +33,7 @@ aarch64
 ```
 - **Taylor Vaughn**:
 
-## Division of Labor
+## Division of Labor (after)
 
 Team Members:
 1. Riley Galpin
@@ -50,18 +50,18 @@ Part 3a: Adding System Calls [Done: Y, Tested: Y]
 - Riley Galpin, John Simson
 
 Part 3b: Kernel Compilation [Done: Y , Tested: Y]
-- Riley Galpin
+- Riley Galpin   - John Simson
 
-Part 3c: Threads [Done: , Tested:]
+Part 3c: Threads [Done: Y, Tested:]
 - John Simson
 
-Part 3d: Linked List [Done: , Tested:]
+Part 3d: Linked List [Done: Y, Tested:]
 - Taylor Vaughn, John Simson
 
-Part 3e: Mutexes [Done: , Tested:]
+Part 3e: Mutexes [Done: Y, Tested:]
 -Taylor Vaughn, John Simson
 
-Part 3f: Scheduling Algorithm [Done: , Tested:]
+Part 3f: Scheduling Algorithm [Done: Y, Tested:]
 - John Simson 
 
 ## General Dev Dependency Graph
