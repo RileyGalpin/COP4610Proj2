@@ -5,7 +5,7 @@
 ## Group Members
 - **[John Simson]**: [School Email]
 - **[Riley Galpin]**: [School Email]
-- **[Taylor Vaughn]**: [School Email]
+- **[Taylor Vaughn]**: tmv22a@fsu.edu
 
 ## Kernel Versions & Ubuntu Versions:
 Everyone Run: 
@@ -32,6 +32,15 @@ x86_64
 aarch64
 ```
 - **Taylor Vaughn**:
+```bash
+No LSB modules are available.
+Distributor ID:	Ubuntu
+Description:	Ubuntu 26.04.1 LTS
+Release:	26.04
+Codename:	resolute
+7.0.0-42-generic
+x86_64
+```
 
 ## Division of Labor (after)
 
@@ -43,7 +52,7 @@ Team Members:
 Part 1: System Call Tracing [Done: Y , Tested: Y]
 - Riley Galpin
 
-Part 2: Timer Kernel Module [Done: , Tested:]
+Part 2: Timer Kernel Module [Done: Y, Tested:]
 - Taylor Vaughn
 
 Part 3a: Adding System Calls [Done: Y, Tested: Y]
@@ -206,9 +215,9 @@ Each member records their contributions here.
 
 | Date       | Work Completed / Notes |
 |------------|------------------------|
-| YYYY-MM-DD | [Description of task]  |
-| YYYY-MM-DD | [Description of task]  |
-| YYYY-MM-DD | [Description of task]  |
+| 2026-10-31 | Completed part 2 timer  |
+| 2026-10-31 | Completed part 3d linked list  |
+| 2026-10-31 | Completed part 3e mutexes  |
 
 
 ### John Simson
@@ -225,8 +234,8 @@ Document in-person meetings, their purpose, and what was discussed.
 
 | Date       | Attendees            | Topics Discussed | Outcomes / Decisions |
 |------------|----------------------|------------------|-----------------------|
-| YYYY-MM-DD | [Names]              | [Agenda items]   | [Actions/Next steps]  |
-| YYYY-MM-DD | [Names]              | [Agenda items]   | [Actions/Next steps]  |
+| 2026-10-14 | Taylor Vaughn, John Simson, Riley Galpin              | Division of labor   | Discussed the project and how to divide work. Started on parts 1, 3a and 3b.  |
+| 2026-10-28 | Taylor Vaughn, John Simson, Riley Galpin              | Discussed project progress   | Discussed which parts of project to complete next and planned timeframe for project completion.  |
 
 
 ## Bugs
