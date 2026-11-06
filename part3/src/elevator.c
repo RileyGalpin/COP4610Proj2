@@ -22,7 +22,7 @@ enum pet_type {
     DACHSHUND
 };
 
-enum elevator_state {
+enum elevator_state { // AI Assisted enum
     ELEVATOR_OFFLINE,
     ELEVATOR_IDLE,
     ELEVATOR_LOADING,
@@ -68,7 +68,7 @@ static int pets_waiting;
 static enum elevator_direction current_direction = DIRECTION_UP;
 static struct proc_dir_entry *elevator_proc_entry;
 
-/* These symbols are exported by the custom kernel's syscall implementation. */
+/* These symbols are exported by the custom kernel's syscall implementation.  AI Assisted */
 extern int (*STUB_start_elevator)(void) __attribute__((weak));
 extern int (*STUB_issue_request)(int, int, int) __attribute__((weak));
 extern int (*STUB_stop_elevator)(void) __attribute__((weak));
@@ -79,7 +79,7 @@ static DEFINE_MUTEX(elevator_mutex);
 static int pets_serviced = 0;
 
 /* Check for work above the current floor while elevator_mutex is held. */
-static bool requests_above_locked(void)
+static bool requests_above_locked(void) // AI Assisted Function
 {
     int floor;
     struct pet *pet;
@@ -98,7 +98,7 @@ static bool requests_above_locked(void)
 }
 
 /* Check for work below the current floor while elevator_mutex is held. */
-static bool requests_below_locked(void)
+static bool requests_below_locked(void) // AI Assisted Function
 {
     int floor;
     struct pet *pet;
@@ -117,7 +117,7 @@ static bool requests_below_locked(void)
 }
 
 /* During shutdown, only onboard pets are allowed to determine movement. */
-static bool passengers_above_locked(void)
+static bool passengers_above_locked(void) // AI Assisted Function
 {
     struct pet *pet;
 
@@ -129,7 +129,7 @@ static bool passengers_above_locked(void)
     return false;
 }
 
-static bool passengers_below_locked(void)
+static bool passengers_below_locked(void) // AI Assisted Function
 {
     struct pet *pet;
 
@@ -142,7 +142,7 @@ static bool passengers_below_locked(void)
 }
 
 /* Complete one loading/unloading stop and report whether anything changed. */
-static bool service_current_floor(void)
+static bool service_current_floor(void) // AI Assisted Function
 {
     int pets_before;
     int pets_after;
@@ -166,7 +166,7 @@ static bool service_current_floor(void)
 }
 
 /* The worker owns movement decisions; list and counter changes stay mutex-protected. */
-static int elevator_thread_fn(void *data)
+static int elevator_thread_fn(void *data) // AI Assisted Function
 {
     bool floor_changed;
     bool work_above;
@@ -236,7 +236,7 @@ static int elevator_thread_fn(void *data)
     return 0;
 }
 
-void initialize_lists(void)
+void initialize_lists(void) // AI Assisted Function
 {
     int i;
 
@@ -258,7 +258,7 @@ void initialize_lists(void)
 }
 
 
-int add_pet(int start_floor, int destination_floor, int type)
+int add_pet(int start_floor, int destination_floor, int type) // AI Assisted Function
 {
     struct pet *new_pet;
 
@@ -302,7 +302,7 @@ int add_pet(int start_floor, int destination_floor, int type)
 }
 
 
-int board_pet(int floor)
+int board_pet(int floor) // AI Assisted Function
 {
     struct pet *next_pet;
 
