@@ -18,11 +18,11 @@ uname -m
 - **John Simson**: 
 ```bash
 No LSB modules are available.
-Distributor ID:	Ubuntu
-Description:	Ubuntu 26.04.1 LTS
-Release:	26.04
-Codename:	resolute
-7.0.0-42-generic
+Distributor ID: Ubuntu
+Description:    Ubuntu 26.04.1 LTS
+Release:        26.04
+Codename:       resolute
+6.16.0-elevator-amd64
 x86_64
 ```
 
