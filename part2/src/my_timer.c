@@ -21,6 +21,10 @@ static ssize_t timer_read(struct file *file, char __user *user_buffer,
     char buffer[256];
     int length;
 
+    /* A proc read can call this callback again after the first buffer, so we only read once. */
+    if (*position != 0)
+        return 0;
+
     ktime_get_real_ts64(&current_time);
 
     length = snprintf(buffer, sizeof(buffer),
