@@ -3,7 +3,7 @@
 [Description]
 
 ## Group Members
-- **[John Simson]**: [School Email]
+- **[John Simson]**: jrs22bf@fsu.edu
 - **[Riley Galpin]**: rg22bf@fsu.edu
 - **[Taylor Vaughn]**: tmv22a@fsu.edu
 
@@ -224,9 +224,9 @@ Each member records their contributions here.
 
 | Date       | Work Completed / Notes |
 |------------|------------------------|
-| 2026-11-03 | [Description of task]  |
-| 2026-11-04 | [Description of task]  |
-| 2026-11-05 | [Description of task]  |
+| 2026-11-03 | Worked on documentation |
+| 2026-11-04 | Updated Dev Dependency graph |
+| 2026-11-05 | Recompiled Kernel for AMD64, Tested functionality. Worked on threads, mutexes, scheduling for elevator. Made producer.c and consumer.c for elevator testing.  |
 
 
 ## Meetings
