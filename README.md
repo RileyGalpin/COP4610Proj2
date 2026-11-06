@@ -1,6 +1,6 @@
 # [COP4610Proj2]
 
-[Description]
+This Project involves using kernel modules and custom system calls to create a pet eleveator.
 
 ## Group Members
 - **[John Simson]**: jrs22bf@fsu.edu
