@@ -132,6 +132,17 @@ flowchart TD
 - **Matching architecture** between the kernel, module, and machine. x86_64 aka AMD64 will be used for the project. The custom kernel must be built for the same architecture as the machine
 - **Root access** for kernel installation, module loading, and module removal
 - **Booted custom kernel** before compiling or loading `elevator.ko`
+- **How to install the custom kernel**: 
+    1. In the LATEST github release: Download the linux-image-...deb and linux-headers-...deb files.
+    2. Move them into a dir in your VM
+    3. check that the files are present with `ls -l`
+    4. Install the kernel and headers with `sudo dpkg -i linux-image-*.deb linux-headers-*.deb`
+    5. Run `sudo update-grub`
+    6. Reboot into the new kernel with `sudo reboot` and select the new kernel in the boot menu if necessary. (Spam esc and go to advanced options if the new kernel is not the default)
+    7. Verify the new kernel is running with `uname -r` and `uname -m`. The output should match the kernel version and architecture of the custom kernel you installed.
+
+
+
 
 ## Building and Running
 
