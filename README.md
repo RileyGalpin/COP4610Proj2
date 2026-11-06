@@ -129,7 +129,7 @@ flowchart TD
 - **Compiler and build tools**: `gcc`, `make`, and standard build utilities
 - **Kernel source or a provided custom-kernel release** containing syscalls
     548, 549, and 550
-- **Matching architecture** between the kernel, module, and machine
+- **Matching architecture** between the kernel, module, and machine. x86_64 aka AMD64 will be used for the project. The custom kernel must be built for the same architecture as the machine
 - **Root access** for kernel installation, module loading, and module removal
 - **Booted custom kernel** before compiling or loading `elevator.ko`
 
